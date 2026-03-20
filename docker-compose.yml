@@ -1,0 +1,48 @@
+services:
+  tyk-gateway:
+    image: tykio/tyk-gateway:${GATEWAY_VERSION:-v5.8.12}
+    container_name: tyk-gateway
+    ports:
+      - "8080:8080"
+    env_file:
+      - ./confs/tyk.env
+    environment:
+      - TYK_GW_SLAVEOPTIONS_RPCKEY=${ORG_ID:-<ORG_ID>}
+      - TYK_GW_SLAVEOPTIONS_APIKEY=${API_KEY:-<API-KEY>}
+      - TYK_GW_SLAVEOPTIONS_CONNECTIONSTRING=${MDCB_INGRESS:-<MDCB-INGRESS>:443}
+      - TYK_GW_SLAVEOPTIONS_GROUPID=${GROUP_ID:-<GROUP_ID>}
+    networks:
+      - tyk
+    depends_on:
+    - tyk-redis
+
+  tyk-pump:
+    image: tykio/tyk-pump-docker-pub:${PUMP_VERSION:-v1.14.0}
+    container_name: tyk-pump
+    env_file:
+      - ./confs/pump.env
+    environment:
+      - TYK_PMP_PUMPS_HYBRID_META_RPCKEY=${ORG_ID:-<ORG_ID>}
+      - TYK_PMP_PUMPS_HYBRID_META_APIKEY=${API_KEY:-<API-KEY>}
+      - TYK_PMP_PUMPS_HYBRID_META_CONNECTIONSTRING=${MDCB_INGRESS:-<MDCB-INGRESS>:443}
+      - TYK_PMP_PUMPS_HYBRID_META_GROUPID=${GROUP_ID:-<GROUP_ID>}
+    networks:
+      - tyk
+    depends_on:
+    - tyk-redis
+
+  tyk-redis:
+    image: redis:${REDIS_VERSION:-7}
+    container_name: tyk-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    networks:
+      - tyk
+
+volumes:
+  redis-data:
+
+networks:
+  tyk:

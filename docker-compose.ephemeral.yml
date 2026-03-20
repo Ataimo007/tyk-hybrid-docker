@@ -1,0 +1,3 @@
+services:
+  tyk-redis:
+    volumes: []
