@@ -1,0 +1,41 @@
+services:
+  tyk-gateway:
+    image: tykio/tyk-gateway:${GATEWAY_VERSION:-v5.8.12}
+    container_name: tyk-gateway
+    ports:
+      - "8080:8080"
+    env_file:
+      - ./tyk.env
+    environment:
+      - TYK_GW_SLAVEOPTIONS_RPCKEY=<ORG-ID>
+      - TYK_GW_SLAVEOPTIONS_APIKEY=<API-KEY>
+      - TYK_GW_SLAVEOPTIONS_CONNECTIONSTRING=<MDCB-URL>:443
+      - TYK_GW_SLAVEOPTIONS_GROUPID=<GROUP-ID>
+    depends_on:
+    - tyk-redis
+
+  tyk-pump:
+    image: tykio/tyk-pump-docker-pub:${PUMP_VERSION:-v1.14.0}
+    container_name: tyk-pump
+    env_file:
+      - ./pump.env
+    environment:
+      - TYK_PMP_PUMPS_HYBRID_META_RPCKEY=<ORG-ID>
+      - TYK_PMP_PUMPS_HYBRID_META_APIKEY=<API-KEY>
+      - TYK_PMP_PUMPS_HYBRID_META_CONNECTIONSTRING=<MDCB-URL>:443
+      - TYK_PMP_PUMPS_HYBRID_META_GROUPID=<GROUP-ID>
+    depends_on:
+    - tyk-redis
+
+  tyk-redis:
+    image: redis:7
+    container_name: tyk-redis
+    ports:
+      - "6379:6379/tcp"
+    deploy:
+      replicas: 1  # Forces ACA to keep at least 1 instance running
+      resources:
+        reservations:
+          cpus: '0.5'
+          memory: 1Gb
+

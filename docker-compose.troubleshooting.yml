@@ -1,0 +1,11 @@
+services:
+
+  netshoot:
+    image: nicolaka/netshoot
+    network_mode: "service:tyk-gateway"  # shares tyk-gateway's network namespace
+    cap_add:
+      - NET_ADMIN
+      - NET_RAW
+    command: sleep infinity
+    depends_on:
+      - tyk-gateway

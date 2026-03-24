@@ -1,1 +1,4 @@
 **/.env
+**/azure-container-apps/docker-compose.mine.yml
+**/.DS_Store
+**/rpc.pcap
